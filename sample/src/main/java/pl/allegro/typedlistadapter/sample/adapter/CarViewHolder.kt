@@ -1,6 +1,6 @@
 package pl.allegro.typedlistadapter.sample.adapter
 
-import android.view.ViewGroup
+import android.view.View
 import android.widget.TextView
 import pl.allegro.typedlistadapter.TypedListViewHolder
 import pl.allegro.typedlistadapter.TypedListViewHolderFactory
@@ -8,9 +8,9 @@ import pl.allegro.typedlistadapter.sample.R
 import pl.allegro.typedlistadapter.sample.data.Car
 
 class CarViewHolder(
-    parent: ViewGroup,
+    view: View,
     val onClickListener: (Car) -> Unit,
-) : TypedListViewHolder<Car>(parent, R.layout.item_car) {
+) : TypedListViewHolder<Car>(view) {
 
     private val brand: TextView = itemView.findViewById(R.id.brand)
     private val model: TextView = itemView.findViewById(R.id.model)
@@ -22,6 +22,7 @@ class CarViewHolder(
     }
 
     class Factory(onClickListener: (Car) -> Unit) : TypedListViewHolderFactory<Car>(
+        R.layout.item_car,
         CarViewHolder::class.java,
         createViewHolder = { CarViewHolder(it, onClickListener) }
     )

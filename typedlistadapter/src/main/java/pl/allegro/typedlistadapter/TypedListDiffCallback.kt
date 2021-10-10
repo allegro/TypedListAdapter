@@ -4,7 +4,7 @@ import androidx.recyclerview.widget.DiffUtil
 
 internal class TypedListDiffCallback(
     private val viewHolderFactories: List<TypedListViewHolderFactory<out TypedListItem>>
-    ) : DiffUtil.ItemCallback<TypedListItem>() {
+) : DiffUtil.ItemCallback<TypedListItem>() {
 
     override fun areItemsTheSame(oldItem: TypedListItem, newItem: TypedListItem): Boolean {
         return findViewHolderFactory(oldItem).hasItemsTheSameClassAndAreTheSame(oldItem, newItem)

@@ -8,10 +8,15 @@ class TypedListDiffConfigFactory(
     private val viewHolderFactories: List<TypedListViewHolderFactory<out TypedListItem>>
 ) {
 
-    @SuppressLint("RestrictedApi") // Use same logic as in architecture components. It's all Google stuff
     fun create(): AsyncDifferConfig<TypedListItem> {
         return AsyncDifferConfig.Builder(TypedListDiffCallback(viewHolderFactories))
-            .setBackgroundThreadExecutor(ArchTaskExecutor.getIOThreadExecutor())
+            .setBackgroundThreadExecutor(backgroundThreadExecutorInstance())
             .build()
     }
+
+    // This is the same executor as used internally across Architecture Components libraries.
+    // Why it isn't used in RecyclerView library, remains a mystery. We decided to use it,
+    // because unlike default RV executor, this one works flawlessly with Espresso tests.
+    @SuppressLint("RestrictedApi")
+    private fun backgroundThreadExecutorInstance() = ArchTaskExecutor.getIOThreadExecutor()
 }

@@ -1,23 +1,20 @@
 package pl.allegro.typedlistadapter.sample.adapter
 
-import android.view.LayoutInflater
+import android.view.View
+import pl.allegro.typedlistadapter.TypedListViewHolder
 import pl.allegro.typedlistadapter.TypedListViewHolderFactory
-import pl.allegro.typedlistadapter.ViewBindingTypedListViewHolder
+import pl.allegro.typedlistadapter.sample.R
 import pl.allegro.typedlistadapter.sample.data.Advertisement
-import pl.allegro.typedlistadapter.sample.databinding.ItemAdvertisementBinding
 
-class AdvertisementViewHolder(binding: ItemAdvertisementBinding) :
-    ViewBindingTypedListViewHolder<Advertisement, ItemAdvertisementBinding>(binding) {
+class AdvertisementViewHolder(view: View) : TypedListViewHolder<Advertisement>(view) {
 
     override fun bind(item: Advertisement) {
         // noop
     }
 
     class Factory : TypedListViewHolderFactory<Advertisement>(
+        R.layout.item_advertisement,
         AdvertisementViewHolder::class.java,
-        createViewHolder = { parent ->
-            val binding = ItemAdvertisementBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            AdvertisementViewHolder(binding)
-        }
+        createViewHolder = { AdvertisementViewHolder(it) }
     )
 }

@@ -2,11 +2,10 @@ package pl.allegro.typedlistadapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 
 open class TypedListAdapter(
     private val viewHolderFactories: List<TypedListViewHolderFactory<out TypedListItem>>
-) : ListAdapter<TypedListItem, BaseTypedListViewHolder<out TypedListItem>>(
+) : ListAdapter<TypedListItem, TypedListViewHolder<out TypedListItem>>(
     TypedListDiffConfigFactory(viewHolderFactories).create()
 ) {
 
@@ -30,22 +29,33 @@ open class TypedListAdapter(
         super.submitList(list, commitCallback)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseTypedListViewHolder<out TypedListItem> {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): TypedListViewHolder<out TypedListItem> {
+
         return viewHolderFactories[viewType].onCreateViewHolder(parent)
     }
 
-    override fun onBindViewHolder(viewHolder: BaseTypedListViewHolder<out TypedListItem>, position: Int) {
+    override fun onBindViewHolder(
+        viewHolder: TypedListViewHolder<out TypedListItem>,
+        position: Int
+    ) {
         val viewHolderFactory = viewHolderFactories[getItemViewType(position)]
         viewHolderFactory.bind(getItem(position), viewHolder)
     }
 
     override fun onBindViewHolder(
-        viewHolder: BaseTypedListViewHolder<out TypedListItem>,
+        viewHolder: TypedListViewHolder<out TypedListItem>,
         position: Int,
         payloads: MutableList<Any>
     ) {
         if (payloads.isNotEmpty()) {
-            viewHolderFactories[getItemViewType(position)].bind(getItem(position), viewHolder, payloads)
+            viewHolderFactories[getItemViewType(position)].bind(
+                getItem(position),
+                viewHolder,
+                payloads
+            )
         } else {
             super.onBindViewHolder(viewHolder, position, payloads)
         }
@@ -60,7 +70,7 @@ open class TypedListAdapter(
             ?: throw IllegalArgumentException("No view holder factory found for ${item::class.java}")
     }
 
-    override fun onViewRecycled(viewHolder: BaseTypedListViewHolder<out TypedListItem>) {
+    override fun onViewRecycled(viewHolder: TypedListViewHolder<out TypedListItem>) {
         viewHolder.unbind()
     }
 }
