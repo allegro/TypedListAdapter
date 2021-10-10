@@ -13,7 +13,6 @@ open class TypedListAdapter(
     private var items: List<TypedListItem> = emptyList()
 
     fun getIndexOfItem(item: TypedListItem): Int {
-        RecyclerView
         return items.indexOfFirst { it == item }
     }
 
