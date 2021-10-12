@@ -12,9 +12,7 @@ class CoffeeViewHolder(view: View) : TypedListViewHolder<Coffee>(view) {
     private val binding = ItemCoffeeBinding.bind(itemView)
 
     override fun bind(item: Coffee) {
-        with(binding) {
-            name.text = item.name
-        }
+        binding.name.text = item.name
     }
 
     class Factory : TypedListViewHolderFactory<Coffee>(

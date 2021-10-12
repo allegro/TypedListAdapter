@@ -4,7 +4,7 @@ TypedListAdapter
 Wrapper over existing `RecyclerView.Adapter`, to make developers life easier.
 - supports multiple view types without dealing with `getItemViewType`!
 - reuse ViewHolders across different adapters, with one line of code!
-- build-in DiffUtil support!
+- built-in DiffUtil support!
 
 Usage
 -----
@@ -21,19 +21,23 @@ dependencies {
 }
 ```
 
-Lets say, we have some domain class that we want to show in our `RecyclerView`:
+Let's say, we have some domain classes that we want to show in our `RecyclerView`:
 
 ```kotlin
 data class Car(val brand: String, val model: String)
+
+data class Coffee(val name: String)
 ```
 
-First, we must extend this class with marker interface, `TypedListItem`:
+First, those classes need to implement a marker interface, `TypedListItem`:
 
 ```kotlin
 data class Car(val brand: String, val model: String) : TypedListItem
+
+data class Coffee(val name: String) : TypedListItem
 ```
 
-Now we can create a ViewHolder for this class. It must extend `TypedListViewHolder`:
+Now we can create a ViewHolder for each of those classes. It must extend `TypedListViewHolder`:
 
 ```kotlin
 class CarViewHolder(view: View) : TypedListViewHolder<Car>(view) {
@@ -44,6 +48,15 @@ class CarViewHolder(view: View) : TypedListViewHolder<Car>(view) {
     override fun bind(item: Car) {
         brand.text = item.brand
         model.text = item.model
+    }
+}
+
+class CoffeeViewHolder(view: View) : TypedListViewHolder<Coffee>(view) {
+
+    private val name: TextView = itemView.findViewById(R.id.name)
+
+    override fun bind(item: Coffee) {
+        name.text = item.name
     }
 }
 ```
@@ -61,6 +74,19 @@ class CarViewHolder(view: View) : TypedListViewHolder<Car>(view) {
         createViewHolder = { CarViewHolder(it) }
     )
 }
+
+class CoffeeViewHolder(view: View) : TypedListViewHolder<Coffee>(view) {
+
+    // ...
+
+    class Factory : TypedListViewHolderFactory<Coffee>(
+        R.layout.item_coffee,
+        CoffeeViewHolder::class.java,
+        createViewHolder = { CoffeeViewHolder(it) }
+    )
+}
+
+// CoffeeViewHolder
 ```
 
 The last step is creating the adapter itself. For that, we need to pass a list that contains a factory
@@ -70,7 +96,7 @@ for every item that will be used in this adapter:
 val typedListAdapter = TypedListAdapter(
         viewHolderFactories = listOf(
             CarViewHolder.Factory(),
-            // ...
+            CoffeeViewHolder.Factory(),
         )
     )
 ```
@@ -80,6 +106,7 @@ And that's it, the adapter is ready to go!
 ```kotlin
 val contentToDisplay: List<TypedListItem> = listOf(
     Car("Audi", "A8"),
+    Coffee("Espresso"),
     Car("Alfa Romeo", "Giula"),
     // ...
 )

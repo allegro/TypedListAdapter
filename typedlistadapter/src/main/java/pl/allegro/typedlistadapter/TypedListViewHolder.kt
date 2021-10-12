@@ -8,7 +8,7 @@ abstract class TypedListViewHolder<I : TypedListItem>(itemView: View) :
 
     abstract fun bind(item: I)
 
-    open fun bind(item: I, payloads: MutableList<Any>) {
+    open fun bind(item: I, payloads: List<Any>) {
         // nop
     }
 

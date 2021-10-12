@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Sample</string>
+    <string name="advertisement_text">THIS IS AN AD</string>
 </resources>
