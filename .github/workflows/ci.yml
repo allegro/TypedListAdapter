@@ -29,5 +29,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
       - name: Test with Gradle
         run: ./gradlew --no-daemon --continue check
