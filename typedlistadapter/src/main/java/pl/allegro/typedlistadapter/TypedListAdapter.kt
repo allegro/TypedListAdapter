@@ -15,7 +15,7 @@ open class TypedListAdapter(
         return items.indexOfFirst { it == item }
     }
 
-    fun getIndexOfItem(predicate: (TypedListItem) -> Boolean): Int? {
+    fun getIndexOfItem(predicate: (TypedListItem) -> Boolean): Int {
         return items.indexOfFirst { predicate(it) }
     }
 
