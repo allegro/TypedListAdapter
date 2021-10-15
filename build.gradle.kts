@@ -69,13 +69,6 @@ publishing {
     }
 }
 
-System.getenv("GPG_KEY_ID")?.let {
-    signing {
-        useGpgCmd()
-        sign(publishing.publications["sonatype"])
-    }
-}
-
 nexusPublishing {
     repositories {
         sonatype {
