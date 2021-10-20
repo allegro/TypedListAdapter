@@ -1,79 +1,78 @@
 package pl.allegro.typedlistadapter
 
 import android.view.View
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertTrue
 import org.junit.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 class TypedListViewHolderFactoryTest {
-
-    private val areItemsTheSame: (TestItem, TestItem) -> Boolean = mock()
-    private val areContentsTheSame: (TestItem, TestItem) -> Boolean = mock()
-    private val getChangePayload: (TestItem, TestItem) -> Any = mock()
-    private val isItemCompatible: ItemCompatibilityChecker<TestItem> = mock()
 
     private val viewHolderFactories: TypedListViewHolderFactory<TestItem> =
         object : TypedListViewHolderFactory<TestItem>(
             layoutId = 0,
-            viewHolderClass = DummyViewHolder::class.java,
-            createViewHolder = { DummyViewHolder(it) },
-            areItemsTheSame = areItemsTheSame,
-            areContentsTheSame = areContentsTheSame,
-            getChangePayload = getChangePayload,
-            isItemCompatible = isItemCompatible
+            viewHolderClass = TestViewHolder::class.java,
+            createViewHolder = { TestViewHolder(it) },
+            areItemsTheSame = { first, second -> first.id == second.id },
+            areContentsTheSame = { first, second -> first.message == second.message },
+            getChangePayload = { _, second -> Payload.Message(second.message) },
         ) {
         }
 
     @Test
-    fun `should check if item is compatible`() {
-        // given
-        val item = TestItem
-        whenever(isItemCompatible(any(), any())).thenReturn(true)
-
+    fun `should check if item is not compatible`() {
         // when
-        viewHolderFactories.isItemCompatible(item)
+        val result = viewHolderFactories.isItemCompatible(IncompatibleItem)
 
         // then
-        verify(isItemCompatible).invoke(TestItem::class.java, item)
+        assertFalse(result)
+    }
+
+    @Test
+    fun `should check if item is compatible`() {
+        // given
+        val item = TestItem(1, "Test message")
+
+        // when
+        val result = viewHolderFactories.isItemCompatible(item)
+
+        // then
+        assertTrue(result)
     }
 
     @Test
     fun `should check if item are same class and are the same`() {
         // given
-        val oldItem = TestItem
-        val newItem = TestItem
-        whenever(areItemsTheSame(any(), any())).thenReturn(true)
+        val oldItem = TestItem(1, "Test message")
+        val newItem = TestItem(1, "Test message")
 
         // when
-        viewHolderFactories.hasItemsTheSameClassAndAreTheSame(oldItem, newItem)
+        val result = viewHolderFactories.hasItemsTheSameClassAndAreTheSame(oldItem, newItem)
 
         // then
-        verify(areItemsTheSame).invoke(oldItem, newItem)
+        assertTrue(result)
     }
 
     @Test
     fun `should get change payload`() {
         // given
-        val payload: Any = mock()
-        val oldItem = TestItem
-        val newItem = TestItem
-        whenever(areItemsTheSame(any(), any())).thenReturn(true)
-        whenever(getChangePayload(any(), any())).thenReturn(payload)
+        val oldItem = TestItem(1, "Test message")
+        val newItem = TestItem(1, "New message")
 
         // when
-        viewHolderFactories.getChangePayload(oldItem, newItem)
+        val result = viewHolderFactories.getChangePayload(oldItem, newItem)
 
         // then
-        verify(getChangePayload).invoke(oldItem, newItem)
+        assertEquals(result, Payload.Message("New message"))
     }
 
     @Test
     fun `should bind viewHolder`() {
         // given
-        val item = TestItem
-        val viewHolder: DummyViewHolder = mock()
+        val item = TestItem(1, "Test message")
+        val viewHolder: TestViewHolder = mock()
 
         // when
         viewHolderFactories.bind(item, viewHolder)
@@ -85,10 +84,9 @@ class TypedListViewHolderFactoryTest {
     @Test
     fun `should bind viewHolder with payloads`() {
         // given
-        val payload: Any = mock()
-        val item = TestItem
-        val viewHolder: DummyViewHolder = mock()
-        val payloads = mutableListOf(payload)
+        val item = TestItem(1, "Old Message")
+        val viewHolder: TestViewHolder = mock()
+        val payloads = mutableListOf<Any>(Payload.Message("New message"))
 
         // when
         viewHolderFactories.bind(item, viewHolder, payloads)
@@ -97,11 +95,20 @@ class TypedListViewHolderFactoryTest {
         verify(viewHolder).bind(item, payloads)
     }
 
-    object TestItem : TypedListItem
+    private data class TestItem(
+        val id: Int,
+        val message: String
+    ) : TypedListItem
 
-    open class DummyViewHolder(view: View) : TypedListViewHolder<TestItem>(view) {
+    private object IncompatibleItem : TypedListItem
+
+    private open class TestViewHolder(view: View) : TypedListViewHolder<TestItem>(view) {
         override fun bind(item: TestItem) {
             // nop
         }
+    }
+
+    private sealed class Payload {
+        data class Message(val message: String) : Payload()
     }
 }

@@ -1,28 +1,21 @@
 package pl.allegro.typedlistadapter
 
 import android.view.View
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertTrue
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 class TypedListDiffCallbackTest {
-
-    private val areItemsTheSame: (TestItem, TestItem) -> Boolean = mock()
-    private val areContentsTheSame: (TestItem, TestItem) -> Boolean = mock()
-    private val getChangePayload: (TestItem, TestItem) -> Any = mock()
-    private val isItemCompatible: ItemCompatibilityChecker<TestItem> = mock()
 
     private val viewHolderFactories: TypedListViewHolderFactory<TestItem> =
         object : TypedListViewHolderFactory<TestItem>(
             layoutId = 0,
-            viewHolderClass = DummyViewHolder::class.java,
-            createViewHolder = { DummyViewHolder(it) },
-            areItemsTheSame = areItemsTheSame,
-            areContentsTheSame = areContentsTheSame,
-            getChangePayload = getChangePayload,
-            isItemCompatible = isItemCompatible
+            viewHolderClass = TestViewHolder::class.java,
+            createViewHolder = { TestViewHolder(it) },
+            areItemsTheSame = { first, second -> first.id == second.id },
+            areContentsTheSame = { first, second -> first.message == second.message },
+            getChangePayload = { _, second -> Payload.Message(second.message) },
         ) {
         }
 
@@ -33,57 +26,68 @@ class TypedListDiffCallbackTest {
     @Test
     fun `contents should be the same`() {
         // given
-        val oldItem = TestItem
-        val newItem = TestItem
-        whenever(areItemsTheSame(any(), any())).thenReturn(true)
-        whenever(areContentsTheSame(any(), any())).thenReturn(true)
-        whenever(isItemCompatible(any(), any())).thenReturn(true)
+        val oldItem = TestItem(1, "Test message", true)
+        val newItem = TestItem(1, "Test message", true)
 
         // when
-        callback.areContentsTheSame(oldItem, newItem)
+        val result = callback.areContentsTheSame(oldItem, newItem)
 
         // then
-        verify(areContentsTheSame).invoke(oldItem, newItem)
+        assertTrue(result)
+    }
+
+    @Test
+    fun `items should be different`() {
+        // given
+        val oldItem = TestItem(1, "Test message", true)
+        val newItem = TestItem(2, "Other message", true)
+
+        // when
+        val result = callback.areItemsTheSame(oldItem, newItem)
+
+        // then
+        assertFalse(result)
     }
 
     @Test
     fun `items should be the same`() {
         // given
-        val oldItem = TestItem
-        val newItem = TestItem
-        whenever(areItemsTheSame(any(), any())).thenReturn(true)
-        whenever(isItemCompatible(any(), any())).thenReturn(true)
+        val oldItem = TestItem(1, "Test message", true)
+        val newItem = TestItem(1, "Test message", true)
 
         // when
-        callback.areItemsTheSame(oldItem, newItem)
+        val result = callback.areItemsTheSame(oldItem, newItem)
 
         // then
-        verify(areItemsTheSame).invoke(oldItem, newItem)
+        assertTrue(result)
     }
-
 
     @Test
     fun `should get change payload`() {
         // given
-        val oldItem = TestItem
-        val newItem = TestItem
-        val payload: Any = mock()
-        whenever(areItemsTheSame(any(), any())).thenReturn(true)
-        whenever(isItemCompatible(any(), any())).thenReturn(true)
-        whenever(getChangePayload(any(), any())).thenReturn(payload)
+        val oldItem = TestItem(1, "Test message", true)
+        val newItem = TestItem(1, "New message", true)
 
         // when
-        callback.getChangePayload(oldItem, newItem)
+        val payload = callback.getChangePayload(oldItem, newItem)
 
         // then
-        verify(getChangePayload).invoke(oldItem, newItem)
+        assertEquals(Payload.Message("New message"), payload)
     }
 
-    object TestItem : TypedListItem
+    private data class TestItem(
+        val id: Int,
+        val message: String,
+        val read: Boolean
+    ) : TypedListItem
 
-    class DummyViewHolder(view: View) : TypedListViewHolder<TestItem>(view) {
+    private class TestViewHolder(view: View) : TypedListViewHolder<TestItem>(view) {
         override fun bind(item: TestItem) {
             // nop
         }
+    }
+
+    private sealed class Payload {
+        data class Message(val message: String) : Payload()
     }
 }
