@@ -1,0 +1,64 @@
+apply plugin: "maven-publish"
+apply plugin: "signing"
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set("sources")
+    from android.sourceSets.main.java.srcDirs
+    from android.sourceSets.main.kotlin.srcDirs
+}
+
+artifacts {
+    archives androidSourcesJar
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = rootProject.group
+                artifactId = "typed-list-adapter"
+                version = rootProject.version
+
+                from components.release
+                artifact androidSourcesJar
+
+                pom {
+                    name.set("typed-list-adapter")
+                    description.set("Wrapper over existing `RecyclerView.Adapter`, to make developers life easier.")
+                    url.set("https://github.com/allegro/TypedListAdapter/")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git@github.com:allegro/TypedListAdapter.git")
+                        developerConnection.set("scm:git:ssh://github.com:allegro/TypedListAdapter.git")
+                        url.set("https://github.com/allegro/TypedListAdapter/")
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                if (version.toString().endsWith("SNAPSHOT")) {
+                    url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+                } else {
+                    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                }
+            }
+        }
+    }
+}
+
+System.getenv("GPG_KEY_ID")?.let {
+    signing {
+        useInMemoryPgpKeys(
+                System.getenv("GPG_KEY_ID"),
+                System.getenv("GPG_PRIVATE_KEY"),
+                System.getenv("GPG_PRIVATE_KEY_PASSWORD")
+        )
+        sign(publishing.publications)
+    }
+}
