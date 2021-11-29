@@ -32,6 +32,16 @@ afterEvaluate {
                             url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
                     }
+                    developers {
+                        developer {
+                            id = "ILikeYourHat"
+                            name = "Marcin Laskowski"
+                        }
+                        developer {
+                            id = "michalkuchtar"
+                            name = "Michał Kuchtar"
+                        }
+                    }
                     scm {
                         connection.set("scm:git:git@github.com:allegro/TypedListAdapter.git")
                         developerConnection.set("scm:git:ssh://github.com:allegro/TypedListAdapter.git")
