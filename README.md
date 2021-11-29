@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    TODO
+    implementation "pl.allegro.android.typedlistadapter:typed-list-adapter:0.1.0"
 }
 ```
 
